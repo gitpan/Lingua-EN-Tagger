@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use warnings;
 use strict;
@@ -317,7 +317,10 @@ sub _clean_text {
         return unless $self->_valid_text( $text );
         
         # Strip out any markup and convert entities to their proper form
-        my $html_parser = HTML::TokeParser->new( \$text );
+        my $html_parser;
+        utf8::decode( $text );
+        $html_parser = HTML::TokeParser->new( \$text );
+        
         my $cleaned_text = $html_parser->get_text;
         while( $html_parser->get_token ){
                 $cleaned_text .= ( $html_parser->get_text )." ";
