@@ -1,6 +1,6 @@
-package Lingua::Tagger::EN;
+package Lingua::EN::Tagger;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use warnings;
 use strict;
@@ -21,12 +21,24 @@ use Carp;
 our %_keyword_hash;
 our %_words;
 our %_tags;
-our $lexpath = "~/.POS_lexicon";
+
 our $lexurl = "http://javelina.cet.middlebury.edu/lsi/parser/";
+
+our $lexpath = "~/.POS_lexicon";
+# replace tilde in $lexpath with user's home directory
+# (http://www.perldoc.com/perl5.8.0/pod/perlfaq5.html)
+
+$lexpath =~ s{ ^ ~ ([^/]* ) }
+			 { $1
+				   ? (getpwnam($1))[7]
+				   : ( $ENV{HOME} || $ENV{LOGDIR}
+					   || (getpwuid($>))[7]
+					 )
+}ex;
 
 our $word_file = 'pos_words.hash';
 our $tag_file = 'pos_tags.hash';
-our $mnp; 
+our $mnp; 		# this holds the compiled maximal noun phrase regex
 
 our $word_path = File::Spec->catfile( $lexpath, $word_file );
 our $tag_path = File::Spec->catfile( $lexpath, $tag_file );
@@ -57,8 +69,11 @@ BEGIN {		#	REGEX SETUP
 }
 
 
-mkdir $lexpath unless -d $lexpath;
-
+unless (-d $lexpath) {
+	unless (mkdir $lexpath) {
+		croak "Failed to create lexicon dir at '$lexpath': $!";
+	}
+}
 
 unless ( -f $word_path and -f $tag_path ){
  	__PACKAGE__->initialize();
@@ -937,15 +952,19 @@ sub _get_sub_phrases {
 __END__
 
 
-
 =head1 HISTORY
 
 =over 
+
+=item 0.02
+
+5/03 Applied fixes for module installer from Nathaniel Irons
 
 =item 0.01
 
 Created 10/02 by Aaron Coburn as LSI::Parser::POS
 Moved to  Lingua::EN::Tagger 2/03 Maciej Ceglowski
+
 
 =back 
 

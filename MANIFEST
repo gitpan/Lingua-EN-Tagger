@@ -2,3 +2,4 @@ Makefile.PL
 MANIFEST
 README
 Tagger.pm
+test.pl

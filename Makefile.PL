@@ -13,4 +13,6 @@ WriteMakefile(
     					Carp => '0.01',
     					
     					}, # e.g., Module::Name => 1.1
+    'AUTHOR' => "Maciej Ceglowski and Aaron Coburn <maciej@ceglowski.com>, <acoburn@middlebury.edu>",
+  
 );

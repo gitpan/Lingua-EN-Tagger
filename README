@@ -1,3 +1,17 @@
 Lingua::EN::Tagger 
 
-This is a part-of-speech tagger for English text.  More docs to come...
+This module uses part-of-speech statistics from the Penn Treebank
+to assign POS tags to English text.   The tagger applies a bigram (two-word)
+Hidden Markov Model to guess the appropriate POS tag for a word.  That means
+that the tagger will try to assign a POS tag based on the available POS tags
+for the word, and the POS tag assigned to its predecessor.
+
+The tagger tends to assume unknown words are nouns, but this behavior is 
+configurable.
+
+The POS tagger can also be used to find maximal noun phrases in tagged text.  
+You can run this recursively to find all possible noun phrases.
+
+When first run, this module will try to download POS statistical data and store
+it for later use in the user's home directory.
+
