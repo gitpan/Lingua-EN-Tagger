@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.06';
+our $VERSION = '0.10';
 
 use warnings;
 use strict;
@@ -14,7 +14,7 @@ use Memoize;
 use Storable;
 
 
-# Class variables ( shared among instances )
+# Class variables
 our %_LEXICON;          # this holds the word lexicon
 our %_HMM;              # this holds the hidden markov model for English grammar
 our $MNP;               # this holds the compiled maximal noun phrase regex
@@ -23,7 +23,7 @@ our ( $NUM, $GER, $NNP, $ADJ, $PART, $NN, $PREP, $DET, $PAREN, $QUOT, $SEN, $WOR
 
 
 
-BEGIN {         #       REGEX SETUP 
+BEGIN {     #  REGEX SETUP 
 
         sub get_exp {
                 my ( $tag ) = @_;
@@ -61,6 +61,9 @@ memoize('_assign_tag',
                         CACHESIZE => 10000,
                         ]);
 
+
+######################################################################
+
 =head1 NAME
 
 Lingua::EN::Tagger - Part-of-speech tagger for English natural language processing.
@@ -68,43 +71,39 @@ Lingua::EN::Tagger - Part-of-speech tagger for English natural language processi
 
 =head1 SYNOPSIS
 
-        # Create a parser object
-        my $p = new Lingua::EN::Tagger;
-                
-        # Add part of speech tags to a text
-        my $tagged_text = $p->add_tags( $text );
-        
-        ...
-        
-        # Get a list of all nouns and noun phrases with occurence counts
-        my %word_list = $p->get_words( $text );
-        
-        ...
-        
-        # Get a readable version of the tagged text
-        my $readable_text = $p->get_readable( $text );
+    # Create a parser object
+    my $p = new Lingua::EN::Tagger;
+
+    # Add part of speech tags to a text
+    my $tagged_text = $p->add_tags( $text );
+
+    ...
+
+    # Get a list of all nouns and noun phrases with occurrence counts
+    my %word_list = $p->get_words( $text );
+
+    ...
+    
+    # Get a readable version of the tagged text
+    my $readable_text = $p->get_readable( $text );
         
 
 =head1 DESCRIPTION
 
 The module is a probability based, corpus-trained tagger that assigns POS tags to 
-English text based on a lookup dictionary and probability values.  The tagger
-determines appropriate tags based on conditional probabilities - it looks at the
-preceding tag to figure out what the appropriate tag is for the current word. 
-Unknown words will be classified according to word morphology or can be set to
+English text based on a lookup dictionary and a set of probability values.  The tagger
+assigns appropriate tags based on conditional probabilities - it examines the
+preceding tag to determine the appropriate tag for the current word. 
+Unknown words are classified according to word morphology or can be set to
 be treated as nouns or other parts of speech.
 
-The tagger also recursively extracts as many nouns and noun phrases as it can, using a 
+The tagger also extracts as many nouns and noun phrases as it can, using a 
 set of regular expressions. 
 
-=head2 CLASS METHODS
+=head1 CONSTRUCTOR
 
 =over 
 
-
-=head1 METHODS
-        
-=over 
 
 =item new %PARAMS
 
@@ -123,7 +122,7 @@ Stem single words using Lingua::Stem::EN
 
 =item weight_noun_phrases => 1
 
-When returning occurence counts for a noun phrase, multiply the value 
+When returning occurrence counts for a noun phrase, multiply the value 
 by the number of words in the NP.   
 
 =item longest_noun_phrase => 50
@@ -139,6 +138,8 @@ uncommon words, particularly words used polysemously
 =back
 
 =cut
+
+######################################################################
 
 sub new {
         my ( $class, %params ) = @_;
@@ -170,14 +171,20 @@ sub new {
         
         return $self;
 }
-        
-=over 
+
+######################################################################
+
+=head1 METHODS
+         
+ 
 
 =item add_tags TEXT
  
 Examine the string provided and return it fully tagged ( XML style )
 
 =cut
+
+######################################################################
 
 sub add_tags {
         
@@ -199,6 +206,7 @@ sub add_tags {
 }       
 
 
+######################################################################
 
 =item get_words TEXT
 
@@ -207,17 +215,16 @@ noun phrases as possible.  Applies L<add_tags> and involves three stages:
 
 =over 
 
-=item * Tag the text
-
-=item * Extract all the maximal noun phrases
-
-=item * Recursively extract all noun phrases from the MNPs
+    * Tag the text
+    * Extract all the maximal noun phrases
+    * Recursively extract all noun phrases from the MNPs
 
 =back
 
 =cut
 
-                
+######################################################################
+
 sub get_words {
         my ( $self, $text ) = @_;
         
@@ -231,7 +238,8 @@ sub get_words {
                 return $self->get_noun_phrases( $tagged );
         } 
 }
-        
+
+######################################################################
 
 =item get_readable TEXT
 
@@ -239,6 +247,8 @@ Return an easy-on-the-eyes tagged version of a text string.  Applies
 L<add_tags> and reformats to be easier to read.
 
 =cut            
+
+######################################################################
 
 sub get_readable {
         my ( $self, $text ) = @_;
@@ -368,7 +378,7 @@ sub _split_sentences {
         }
 
         # If the final word ends in a period...
-        if( $words[$#words] =~ /^(.*\w)\.$/ ){                  
+        if( $words[$#words] =~ /^(.*[\w\xc0-\xff])\.$/ ){                  
                 $words[$#words] = $1;                           
                 push @words, '.';
         }
@@ -391,7 +401,7 @@ sub _split_punct {
         local $_ = $_[1];       
 
         # If there's no punctuation, return immediately
-        return $_ if /^[a-zA-Z]+$/;
+        return $_ if /^\w+$/;
         
         # Sanity checks
         s/\W{10,}/ /og;         # get rid of long trails of non-word characters
@@ -407,8 +417,9 @@ sub _split_punct {
         s/--+/ - /go;                   # Convert and separate dashes
         s/,(?!\d)/ , /go;               # Shift commas off everything but numbers
         s/:$/ :/go;                     # Shift semicolons off
-        s/(\.\.\.+)/ $1 /;              # Shift elipses off 
-        s/(?![`'\.,\s:-])(\W)/ $1 /go;  # Separate all other punctuation      
+        s/(\.\.\.+)/ $1 /;              # Shift ellipses off 
+        s/([\(\[\{\}\]\)])/ $1 /go;     # Shift off brackets
+        s/([\!\?#\$%;~|])/ $1 /go;      # Shift off other ``standard'' punctuation
 
         # English-specific contractions
         s/(?<=[a-zA-Z])'([dms])\b/ '$1/go;      # Separate off 'd 'm 's
@@ -467,7 +478,7 @@ sub _assign_tag {
                         next;
                 }
                 
-                # Baysian logic: 
+                # Bayesian logic: 
                 # P =  P( $tag | $prev_tag ) * P( $tag | $word )
                 my $probability =
                         $t->{$prev_tag}{$tag} * ( $pw + 1 );
@@ -486,7 +497,7 @@ sub _assign_tag {
 ############################################################################
 # _reset
 #
-# ehis subroutine will reset the preceeding tag to a sentence ender ( PP ). 
+# this subroutine will reset the preceeding tag to a sentence ender ( PP ). 
 # This prepares the first word of a new sentence to be tagged correctly.
 ############################################################################
 sub _reset {
@@ -563,7 +574,7 @@ sub _classify_unknown_word {
         } elsif ( m/^\W+$/o ){ # Symbol
                 $word = "-sym-";
                 
-        } elsif ( $_ eq ucfirst ) { # Capiitalized word
+        } elsif ( $_ eq ucfirst ) { # Capitalized word
                 $word = "-cap-";
                 
         } elsif (  m/ing$/o ) { # Ends in 'ing'
@@ -629,15 +640,17 @@ sub _get_max_noun_regex {
 }
 
 ######################################################################
+
 =item get_proper_nouns TAGGED_TEXT
 
 Given a POS-tagged text, this method returns a hash of all proper nouns
-and their occurance frequencies. The method is greedy and will
+and their occurrence frequencies. The method is greedy and will
 return multi-word phrases, if possible, so it would find ``Linguistic
 Data Consortium'' as a single unit, rather than as three individual 
 proper nouns. This method does not stem the found words. 
 
 =cut
+
 ######################################################################
 sub get_proper_nouns {
         my ( $self, $text ) = @_;
@@ -681,12 +694,14 @@ sub get_proper_nouns {
 
 
 ######################################################################
+
 =item get_nouns TAGGED_TEXT
 
 Given a POS-tagged text, this method returns all nouns and their 
-occurance frequencies.
+occurrence frequencies.
 
 =cut
+
 ######################################################################
 sub get_nouns {
         my ( $self, $text ) = @_;
@@ -710,12 +725,14 @@ sub get_nouns {
 
 
 ######################################################################
+
 =item get_max_noun_phrases TAGGED_TEXT
 
 Given a POS-tagged text, this method returns only the maximal noun phrases.
 May be called directly, but is also used by L<get_noun_phrases>
 
 =cut
+
 ######################################################################
 sub get_max_noun_phrases {
         my ( $self, $text ) = @_;
@@ -745,11 +762,13 @@ sub get_max_noun_phrases {
 
 
 ######################################################################
+
 =item get_noun_phrases TAGGED_TEXT
 
 Similar to get_words, but requires a POS-tagged text as an argument.
 
 =cut
+
 ######################################################################
 sub get_noun_phrases {
         
@@ -806,13 +825,15 @@ sub get_noun_phrases {
 
 
 ######################################################################
+
 =item install
 
 Reads some included corpus data and saves it in a stored hash on the 
-local filesystem. This is called automatically if the tagger can't 
+local file system. This is called automatically if the tagger can't 
 find the stored lexicon. 
 
 =cut
+
 ######################################################################
 sub install {
         my ( $self ) = @_;
@@ -895,8 +916,8 @@ __END__
 
 =head1 AUTHORS
 
-        Maciej Ceglowski <developer@ceglowski.com>
-        Aaron Coburn <acoburn@middlebury.edu>
+    Maciej Ceglowski <developer@ceglowski.com>
+    Aaron Coburn <acoburn@middlebury.edu>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of version 2 of the GNU General Public License as

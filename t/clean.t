@@ -4,7 +4,7 @@
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
-use Test::More tests => 18;
+use Test::More tests => 20;
 use Lingua::EN::Tagger;
 
 ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
@@ -27,15 +27,16 @@ ok( $parser = Lingua::EN::Tagger->new(), 'creating parser object' );
 # Check various cases of punctuation
 # with the private _split_punct() method
 ########################################
-like( join( " ", $parser->_split_punct( '"word!")' ) ), qr/`` word \! '' \)/, 'punctuation 1' ); 
-like( join( " ", $parser->_split_punct( '"word.")' ) ), qr/`` word\. '' \)/, 'punctuation 2' ); 
-like( join( " ", $parser->_split_punct( 'word--word' ) ), qr/word - word/, 'punctuation 3' ); 
+like( join( " ", $parser->_split_punct( '"word!")') ), qr/`` word \! '' \)/, 'punctuation 1'); 
+like( join( " ", $parser->_split_punct( '"word.")') ), qr/`` word\. '' \)/, 'punctuation 2' ); 
+like( join( " ", $parser->_split_punct( 'word--word') ), qr/word - word/, 'punctuation 3' ); 
 like( join( " ", $parser->_split_punct( "didn't." ) ), qr/did n't\./, 'punctuation 4' ); 
 like( join( " ", $parser->_split_punct( "(she'll)" ) ), qr/\( she 'll \)/, 'punctuation 5' ); 
 like( join( " ", $parser->_split_punct( "'that's'" ) ), qr/` that 's '/, 'punctuation 6' ); 
 like( join( " ", $parser->_split_punct( '"we\'ve"' ) ), qr/`` we 've ''/, 'punctuation 7' ); 
 like( join( " ", $parser->_split_punct( '"o\'er"' ) ), qr/`` o'er ''/, 'punctuation 8' ); 
-
+like( join( " ", $parser->_split_punct( 'naïve' )), qr/naïve/, 'punctuation 9' );
+like( join( " ", $parser->_clean_text( 'We, naïve souls, drank tea in a café.' ) ), qr/We , naïve souls , drank tea in a café ./, 'punctuation 10' );
 # Make sure that it doesn't die when parsing a non-text sample
 ok( $parser->add_tags( "#!/usr/bin/perl -w\nuse strict;\nmy \$var = 'hello world';
 print \$var | 'no value'; "), "non-text sample");

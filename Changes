@@ -1,5 +1,13 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.10            Aaron Coburn            4/27/04
+
+        Fixed some errors in the POD documentation
+
+0.09            Aaron Coburn            2/04/04
+
+        Improved the splitting on punctuation
+
 0.06            Aaron Coburn            12/18/03
 
         Improved recognition of an end of sentence
