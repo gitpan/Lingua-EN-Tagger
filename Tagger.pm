@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use warnings;
 use strict;
@@ -155,7 +155,7 @@ sub new {
         bless $self, $class;
         
         unless ( -f $self->{'word_path'} and -f $self->{'tag_path'} ){
-                carp "Couldn't locate POS lexicon, compiling new one" if $self->{'debug'};
+                carp "Couldn't locate POS lexicon, creating new one" if $self->{'debug'};
                 $self->install();
         } else {
                 %_LEXICON = %{ retrieve( $self->{'word_path'} ) }; # A hash of words and corresponding parts of speech
@@ -498,7 +498,7 @@ sub _classify_unknown_word {
         } elsif ( m/\w-\w/o ){ # Hyphenated word
                 my ( $h_suffix) = m/-([^-]+)$/;
                 
-                if ( defined ${ $_LEXICON{$h_suffix}{'jj'} } ){
+                if ( $h_suffix and defined ${ $_LEXICON{$h_suffix}{'jj'} } ){
                         # last part of this is defined as an adjective
                         $word = "-hyp-adj-";
                 } else {
@@ -709,7 +709,7 @@ find the stored lexicon.
 sub install {
         my ( $self ) = @_;
                 
-        carp "Compiling part-of-speech lexicon" if $self->{'debug'};
+        carp "Creating part-of-speech lexicon" if $self->{'debug'};
         $self->_load_tags( $self->{'tag_lex'} );
         $self->_load_words( $self->{'word_lex'} );
         $self->_load_words( $self->{'unknown_lex'} );
@@ -788,6 +788,10 @@ __END__
 =head1 HISTORY
 
 =over 
+
+=item 0.04
+
+11/03 Applied fixes to unknown word assignment
 
 =item 0.03
 

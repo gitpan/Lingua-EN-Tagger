@@ -32,7 +32,7 @@ WriteMakefile(
 sub install {
         use Storable;
         use File::Spec;
-        print "Compiling part-of-speech lexicon\n";
+        print "Creating part-of-speech lexicon\n";
         my $lex_dir = 'Tagger';
         my $word_path = File::Spec->catfile( $lex_dir, 'pos_words.hash' );
         my $tag_path = File::Spec->catfile( $lex_dir, 'pos_tags.hash' );
