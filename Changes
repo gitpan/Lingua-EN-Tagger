@@ -1,5 +1,9 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.06            Aaron Coburn            12/18/03
+
+        Improved recognition of an end of sentence
+        
 
 0.05            Aaron Coburn            12/09/03
         

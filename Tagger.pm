@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use warnings;
 use strict;
@@ -334,7 +334,7 @@ sub _split_sentences {
         my ( $self, $array_ref ) = @_;
         my @tokenized = @{ $array_ref };
         
-        my @PEOPLE = qw/jr mr ms mrs dr prof sr sen sens rep reps gov attys attys supt det mssrs rev/;
+        my @PEOPLE = qw/jr mr ms mrs dr prof esq sr sen sens rep reps gov attys attys supt det mssrs rev/;
         my @ARMY = qw/col gen lt cmdr adm capt sgt cpl maj brig/;
         my @INST = qw/dept univ assn bros ph.d/;
         my @PLACE = qw/arc al ave blvd bld cl ct cres exp expy dist mt mtn ft fy fwy hwy hway la pde pd plz pl rd st tce/;
@@ -342,21 +342,27 @@ sub _split_sentences {
     my @STATE = qw/ala ariz ark cal calif colo col conn del fed fla ga ida id ill ind ia kans kan ken ky la me md is mass mich minn miss mo mont neb nebr nev mex okla ok ore penna penn pa dak tenn tex ut vt va wash wis wisc wy wyo usafa alta man ont que sask yuk/;
         my @MONTH = qw/jan feb mar apr may jun jul aug sep sept oct nov dec/;
         my @MISC = qw/vs etc no esp/;
-        my @ABBR = ( @PEOPLE, @ARMY, @INST, @PLACE, @COMP, @STATE, @MONTH, @MISC );
-        
-        my %ABBR = map { $_, 0 } @ABBR;
-        
+        my %ABBR = map { $_, 0 }
+                ( @PEOPLE, @ARMY, @INST, @PLACE, @COMP, @STATE, @MONTH, @MISC );
         
         my @words;
         for( 0 .. $#tokenized ){
                 
-                  if ( defined $tokenized[$_ + 1] 
+                if ( defined $tokenized[$_ + 1] 
                         and $tokenized[$_ + 1] =~ /^[A-Z\W]/ 
                         and $tokenized[$_] =~ /^(.+)\.$/ ){
-                                unless( defined $ABBR{ lc $1 } ){
-                                        push @words, ( $1, '.' );
-                                        next;
-                                }
+                        
+                        # Don't separate the period off words that 
+                        # meet any of the following conditions:
+                        #  1. It is defined in one of the lists above
+                        #  2. It is only one letter long: Alfred E. Sloan 
+                        #  3. It has a repeating letter-dot: U.S.A. or J.C. Penney
+                        unless( defined $ABBR{ lc $1 } 
+                                or $1 =~ /^[a-z]$/i
+                                or $1 =~ /^[a-z](?:\.[a-z])+$/i ){
+                                push @words, ( $1, '.' );
+                                next;
+                        }
                 }
                 push @words, $tokenized[$_];
         }

@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Lingua-EN-Tagger
-version:      0.05
+version:      0.06
 version_from: Tagger.pm
 installdirs:  site
 requires:
@@ -9,6 +9,7 @@ requires:
     HTML::Parser:                  2.28
     Lingua::Stem::En:              0.50
     Memoize:                       1.01
+    Memoize::ExpireLRU:            0.01
     Storable:                      2.08
 
 distribution_type: module

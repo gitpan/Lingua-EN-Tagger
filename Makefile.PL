@@ -15,6 +15,7 @@ WriteMakefile(
     'PREREQ_PM'         => { 'Lingua::Stem::En' => '0.50', 
                                 'HTML::Parser' => '2.28',
                                 'Memoize' => '1.01',
+                                'Memoize::ExpireLRU' => '0.01',
                                 'File::Spec' => '0.84',
                                 'Storable' => '2.08'
                         }, # e.g., Module::Name => 1.1
