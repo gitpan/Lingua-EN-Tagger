@@ -25,14 +25,14 @@ $tagged = $parser->add_tags( penn() );
 
 ok( %words = $parser->get_words( penn() ), 'get_words() method' );
 $accuracy = compute_accuracy( \%words, np_benchmark() );
-is( $accuracy, '100', 'accuracy of np extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of np extraction ($accuracy%)" );
 
 ##############################################
 # Test the extraction of maximal noun phrases
 ##############################################
 ok( %max_noun_phrases = $parser->get_max_noun_phrases( $tagged ), 'extract MNPs' );
 $accuracy = compute_accuracy( \%max_noun_phrases, mnp_benchmark() );
-is( $accuracy, '100', 'accuracy of mnp extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of mnp extraction ($accuracy%)" );
 
 
 ##############################################
@@ -40,14 +40,14 @@ is( $accuracy, '100', 'accuracy of mnp extraction ($accuracy%)' );
 ##############################################
 ok( %noun_phrases = $parser->get_noun_phrases( $tagged ), 'extract noun phrases' );
 $accuracy = compute_accuracy( \%noun_phrases, np_benchmark() );
-is( $accuracy, '100', 'accuracy of np extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of np extraction ($accuracy%)" );
 
 ##############################################
 # Test the extraction of all nouns
 ##############################################
 ok( %nouns = $parser->get_nouns( $tagged ), 'extract nouns' );
 $accuracy = compute_accuracy( \%nouns, noun_benchmark() );
-is( $accuracy, '100', 'accuracy of np extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of np extraction ($accuracy%)" );
 
 
 sub compute_accuracy {

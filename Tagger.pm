@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use warnings;
 use strict;
@@ -10,7 +10,6 @@ use File::Spec;
 use FileHandle;
 use HTML::TokeParser;
 use Lingua::Stem::En;
-use Lingua::EN::Sentence qw( get_sentences add_acronyms );
 use Memoize;
 use Storable;
 
@@ -20,7 +19,7 @@ our %_LEXICON;          # this holds the word lexicon
 our %_HMM;              # this holds the hidden markov model for English grammar
 our $MNP;               # this holds the compiled maximal noun phrase regex
 our ( $lexpath, $word_path, $tag_path );
-our ( $NUM, $GER, $ADJ, $PART, $NN, $PREP, $DET, $PAREN, $QUOT, $SEN, $WORD);
+our ( $NUM, $GER, $NNP, $ADJ, $PART, $NN, $PREP, $DET, $PAREN, $QUOT, $SEN, $WORD);
 
 
 
@@ -37,6 +36,7 @@ BEGIN {         #       REGEX SETUP
         $ADJ  = get_exp( 'jj[rs]*' );
         $PART = get_exp( 'vbn' );
         $NN   = get_exp( 'nn[sp]*' );
+        $NNP  = get_exp( 'nnp' );
         $PREP = get_exp( 'in' );
         $DET  = get_exp( 'det' );
         $PAREN= get_exp( '[lr]rb' );
@@ -53,10 +53,13 @@ BEGIN {         #       REGEX SETUP
 
 memoize('stem',
                  TIE => [ 'Memoize::ExpireLRU',
-                         CACHESIZE => 100000,
+                         CACHESIZE => 1000,
                         ]);
                           
-
+memoize('_assign_tag',
+                TIE => ['Memoize::ExpireLRU',
+                        CACHESIZE => 10000,
+                        ]);
 
 =head1 NAME
 
@@ -308,17 +311,67 @@ sub _clean_text {
                 $cleaned_text .= ( $html_parser->get_text )." ";
         }
         
-        # Add some acronyms not included in Lingua::EN::Sentence
-        add_acronyms('brig','mfg','messrs', @{$self->{'acronyms'} } );
-        my $sentences = get_sentences( $cleaned_text );
 
-        # Tokenize the sentences (splitting on punctuation as you go)
+        # Tokenize the text (splitting on punctuation as you go)
         my @tokenized = map { $self->_split_punct( $_ ) }
-                        map { s/([\.\?\!]+)(\W*)$/ $1 $2 /; split /\s+/ }
-                                @$sentences;
+                                split /\s+/, $cleaned_text;
+        my @words = $self->_split_sentences( \@tokenized );
+        return @words;
         
-        return @tokenized;
+
 }
+
+
+#####################################################################
+# _split_sentences ARRAY_REF
+#
+# This handles all of the trailing periods, keeping those that 
+# belong on abbreviations and removing those that seem to be
+# at the end of sentences. This method makes some assumptions
+# about the use of capitalization in the incoming text
+#####################################################################
+sub _split_sentences {
+        my ( $self, $array_ref ) = @_;
+        my @tokenized = @{ $array_ref };
+        
+        my @PEOPLE = qw/jr mr ms mrs dr prof sr sen sens rep reps gov attys attys supt det mssrs rev/;
+        my @ARMY = qw/col gen lt cmdr adm capt sgt cpl maj brig/;
+        my @INST = qw/dept univ assn bros ph.d/;
+        my @PLACE = qw/arc al ave blvd bld cl ct cres exp expy dist mt mtn ft fy fwy hwy hway la pde pd plz pl rd st tce/;
+        my @COMP = qw/mfg inc ltd co corp/;
+    my @STATE = qw/ala ariz ark cal calif colo col conn del fed fla ga ida id ill ind ia kans kan ken ky la me md is mass mich minn miss mo mont neb nebr nev mex okla ok ore penna penn pa dak tenn tex ut vt va wash wis wisc wy wyo usafa alta man ont que sask yuk/;
+        my @MONTH = qw/jan feb mar apr may jun jul aug sep sept oct nov dec/;
+        my @MISC = qw/vs etc no esp/;
+        my @ABBR = ( @PEOPLE, @ARMY, @INST, @PLACE, @COMP, @STATE, @MONTH, @MISC );
+        
+        my %ABBR = map { $_, 0 } @ABBR;
+        
+        
+        my @words;
+        for( 0 .. $#tokenized ){
+                
+                  if ( defined $tokenized[$_ + 1] 
+                        and $tokenized[$_ + 1] =~ /^[A-Z\W]/ 
+                        and $tokenized[$_] =~ /^(.+)\.$/ ){
+                                unless( defined $ABBR{ lc $1 } ){
+                                        push @words, ( $1, '.' );
+                                        next;
+                                }
+                }
+                push @words, $tokenized[$_];
+        }
+
+        # If the final word ends in a period...
+        if( $words[$#words] =~ /^(.*\w)\.$/ ){                  
+                $words[$#words] = $1;                           
+                push @words, '.';
+        }
+
+        
+        return @words;  
+
+}
+
 
 
 ###########################################################################
@@ -369,21 +422,17 @@ sub _split_punct {
 # This subroutine is a modified version of the Viterbi algorithm
 # for part of speech tagging
 #####################################################################
-my %seen;       # memoize
 sub _assign_tag {
 
         my ( $self, $prev_tag, $word) = @_;
 
-        return $seen{$prev_tag}{$word} if exists( $seen{$prev_tag}{$word});
         
         if ( $self->{'unknown_word_tag'} and $word eq "-unknown-" ){
                 # If the 'unknown_word_tag' value is defined,
                 # classify unknown words accordingly
-                $seen{$prev_tag}{$word} = $self->{'unknown_word_tag'};
                 return $self->{'unknown_word_tag'};
         } elsif ( $word eq "-sym-" ){
                 # If this is a symbol, tag it as a symbol
-                $seen{$prev_tag}{$word} = "sym";
                 return "sym";
         }
         
@@ -424,7 +473,6 @@ sub _assign_tag {
                 }
         }
         
-        $seen{$prev_tag}{$word} = $best_tag;
         return $best_tag;
 }
         
@@ -574,6 +622,56 @@ sub _get_max_noun_regex {
         return $regex;
 }
 
+######################################################################
+=item get_proper_nouns TAGGED_TEXT
+
+Given a POS-tagged text, this method returns a hash of all proper nouns
+and their occurance frequencies. The method is greedy and will
+return multi-word phrases, if possible, so it would find ``Linguistic
+Data Consortium'' as a single unit, rather than as three individual 
+proper nouns. This method does not stem the found words. 
+
+=cut
+######################################################################
+sub get_proper_nouns {
+        my ( $self, $text ) = @_;
+        
+        return unless $self->_valid_text( $text );
+        
+        my @trimmed =   map { $self->_strip_tags( $_ ) }
+                                ( $text =~ /($NNP+)/gs );
+        my %nnp;
+        foreach my $n ( @trimmed ) {
+                
+                next unless length($n) < 100; # sanity check on word length
+                $nnp{$n}++ unless $n =~ /^\s*$/;
+        }
+
+
+        # Now for some fancy resolution stuff...
+        foreach ( keys %nnp ){
+                my @words = split /\s/;
+                
+                # Let's say this is an organization's name --
+                # (and it's got at least three words)
+                # is there a corresponding acronym in this hash?
+                if ( scalar @words > 2 ){
+                        # Make a (naive) acronym out of this name
+                        my $acronym = join '', map{ /^(\w)\w*$/ } @words;
+                        if ( defined $nnp{$acronym} ){
+                                # If that acronym has been seen, 
+                                # remove it and add the values to
+                                # the full name
+                                $nnp{$_} += $nnp{$acronym};
+                                delete $nnp{$acronym};
+                        }
+                }
+        }
+       
+        return %nnp;
+}
+
+
 
 
 ######################################################################
@@ -635,6 +733,10 @@ sub get_max_noun_phrases {
 
 
 }
+
+
+
+
 
 ######################################################################
 =item get_noun_phrases TAGGED_TEXT
@@ -784,33 +886,6 @@ sub _load_words {
 
 
 __END__
-
-=head1 HISTORY
-
-=over 
-
-=item 0.04
-
-11/03 Applied fixes to unknown word assignment
-
-=item 0.03
-
-11/03 Fixed some errors in the text scrubbing methods
-Shortened and moved lexicon, made things run faster
-Added a testing suite
-(Aaron Coburn)
-
-=item 0.02
-
-5/03 Applied fixes for module installer from Nathaniel Irons
-
-=item 0.01
-
-Created 10/02 by Aaron Coburn as LSI::Parser::POS
-Moved to  Lingua::EN::Tagger 2/03 Maciej Ceglowski
-
-
-=back 
 
 =head1 AUTHORS
 

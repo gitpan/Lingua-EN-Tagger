@@ -1,3 +1,4 @@
+Changes
 Makefile.PL
 MANIFEST
 README
@@ -11,3 +12,4 @@ t/weighted.t
 Tagger/tags.yml
 Tagger/unknown.yml
 Tagger/words.yml
+META.yml                                 Module meta-data (added by MakeMaker)

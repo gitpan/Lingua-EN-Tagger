@@ -1,0 +1,31 @@
+Revision history for Perl extension Lingua::EN::Tagger
+
+
+0.05            Aaron Coburn            12/09/03
+        
+        Added method ``get_proper_nouns''
+        Eliminated use of Lingua::EN::Sentence
+        
+
+0.04            Aaron Coburn            12/08/03
+
+        Applied fixes to unknown word assignment
+
+
+0.03            Aaron Coburn            11/03
+
+        Fixed some errors in the text scrubbing methods
+        Shortened and moved lexicon, made things run faster
+        Added a testing suite
+
+
+0.02            Maciej Ceglowski        5/03
+
+        Applied fixes for module installer from Nathaniel Irons
+
+
+0.01            Maciej Ceglowski        2/03
+
+        Initial Release for CPAN
+        Re-written from Aaron Coburn's LSI::Parser::POS 
+

@@ -4,7 +4,7 @@
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Lingua::EN::Tagger;
 
 ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
@@ -25,14 +25,14 @@ $tagged = $parser->add_tags( penn() );
 
 ok( %words = $parser->get_words( penn() ), 'get_words() method' );
 $accuracy = compute_accuracy( \%words, np_benchmark() );
-is( $accuracy, '100', 'accuracy of np extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of np extraction ($accuracy%)" );
 
 ##############################################
 # Test the extraction of maximal noun phrases
 ##############################################
 ok( %max_noun_phrases = $parser->get_max_noun_phrases( $tagged ), 'extract MNPs' );
 $accuracy = compute_accuracy( \%max_noun_phrases, mnp_benchmark() );
-is( $accuracy, '100', 'accuracy of mnp extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of mnp extraction ($accuracy%)" );
 
 
 ##############################################
@@ -40,14 +40,22 @@ is( $accuracy, '100', 'accuracy of mnp extraction ($accuracy%)' );
 ##############################################
 ok( %noun_phrases = $parser->get_noun_phrases( $tagged ), 'extract noun phrases' );
 $accuracy = compute_accuracy( \%noun_phrases, np_benchmark() );
-is( $accuracy, '100', 'accuracy of np extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of np extraction ($accuracy%)" );
 
 ##############################################
 # Test the extraction of all nouns
 ##############################################
 ok( %nouns = $parser->get_nouns( $tagged ), 'extract nouns' );
 $accuracy = compute_accuracy( \%nouns, noun_benchmark() );
-is( $accuracy, '100', 'accuracy of np extraction ($accuracy%)' );
+is( $accuracy, '100', "accuracy of noun extraction ($accuracy%)" );
+
+
+##############################################
+# Test the extraction of proper nouns
+##############################################
+ok( %nnp = $parser->get_proper_nouns( $tagged ), 'extract proper nouns' );
+$accuracy = compute_accuracy( \%nnp, nnp_benchmark() );
+is( $accuracy, '100', "accuracy of nnp extraction ($accuracy%)" );
 
 
 sub compute_accuracy {
@@ -199,6 +207,15 @@ sub np_benchmark {
         return $hash_ref;
 
 }
+sub nnp_benchmark {
+	$hash_ref = { 'lisa raines' => 1,
+			'industrial biotechnical association' => 1,
+			'judge newman' => 1,
+			'ms. raines' => 1
+		};
+	return $hash_ref;
+}
+
 sub words_benchmark {
 }
 
