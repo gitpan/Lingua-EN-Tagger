@@ -1,5 +1,11 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.11            Aaron Coburn            11/15/04
+
+        Improved Unicode support thanks to the contributions from
+        Eric Nichols <eric-n@is.naist.jp>, Nara Institute of 
+        Science and Technology
+
 0.10            Aaron Coburn            4/27/04
 
         Fixed some errors in the POD documentation

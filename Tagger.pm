@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 use warnings;
 use strict;
@@ -42,7 +42,8 @@ BEGIN {     #  REGEX SETUP
         $PAREN= get_exp( '[lr]rb' );
         $QUOT = get_exp( 'ppr' );
         $SEN  = get_exp( 'pp' );
-        $WORD = get_exp( '\w+' );
+        # $WORD = get_exp( '\w+' );
+        $WORD = get_exp( '\p{IsWord}+' );
 
 
         ( $lexpath ) = __FILE__ =~ /(.*)\.pm/;
@@ -256,7 +257,8 @@ sub get_readable {
         return unless $self->_valid_text( $text );
         
         my $tagged =  $self->add_tags( $text );
-        $tagged =~ s/<[a-z]+>([^<]+)<\/([a-z]+)>/$1\/\U$2/go;
+        # $tagged =~ s/<[a-z]+>([^<]+)<\/([a-z]+)>/$1\/\U$2/go;
+        $tagged =~ s/<\p{IsLower}+>([^<]+)<\/(\p{IsLower}+)>/$1\/\U$2/go;
         return $tagged;
 }       
 
@@ -359,7 +361,8 @@ sub _split_sentences {
         for( 0 .. $#tokenized ){
                 
                 if ( defined $tokenized[$_ + 1] 
-                        and $tokenized[$_ + 1] =~ /^[A-Z\W]/ 
+                        # and $tokenized[$_ + 1] =~ /^[A-Z\W]/ 
+                        and $tokenized[$_ + 1] =~ /[\p{IsUpper}\W]/
                         and $tokenized[$_] =~ /^(.+)\.$/ ){
                         
                         # Don't separate the period off words that 
@@ -368,8 +371,8 @@ sub _split_sentences {
                         #  2. It is only one letter long: Alfred E. Sloan 
                         #  3. It has a repeating letter-dot: U.S.A. or J.C. Penney
                         unless( defined $ABBR{ lc $1 } 
-                                or $1 =~ /^[a-z]$/i
-                                or $1 =~ /^[a-z](?:\.[a-z])+$/i ){
+                                or $1 =~ /^\p{IsLower}$/i
+                                or $1 =~ /^\p{IsLower}(?:\.\p{IsLower})+$/i ){
                                 push @words, ( $1, '.' );
                                 next;
                         }
@@ -378,7 +381,7 @@ sub _split_sentences {
         }
 
         # If the final word ends in a period...
-        if( $words[$#words] =~ /^(.*[\w\xc0-\xff])\.$/ ){                  
+        if( $words[$#words] =~ /^(.*\p{IsWord})\.$/ ){                  
                 $words[$#words] = $1;                           
                 push @words, '.';
         }
@@ -401,28 +404,28 @@ sub _split_punct {
         local $_ = $_[1];       
 
         # If there's no punctuation, return immediately
-        return $_ if /^\w+$/;
+        return $_ if /^\p{IsWord}+$/;
         
         # Sanity checks
         s/\W{10,}/ /og;         # get rid of long trails of non-word characters
         
         # Put quotes into a standard format
-        s/`(?!`)(?=.*\w)/` /og;         # Shift left quotes off text
-        s/"(?=.*\w)/ `` /og;            # Convert left quotes to `` 
-        s/(?<![\w\s'])'(?=.*\w)/ ` /go; # Convert left quotes to ` 
+        s/`(?!`)(?=.*\p{IsWord})/` /og;         # Shift left quotes off text
+        s/"(?=.*\p{IsWord})/ `` /og;            # Convert left quotes to `` 
+        s/(?<![\p{IsWord}\s'])'(?=.*\p{IsWord})/ ` /go; # Convert left quotes to ` 
         s/"/ '' /og;                    # Convert (remaining) quotes to ''
-        s/(?<=\w)'(?!')(?=\W|$)/ ' /go; # Separate right single quotes
+        s/(?<=\p{IsWord})'(?!')(?=\W|$)/ ' /go; # Separate right single quotes
 
         # Handle all other punctuation
         s/--+/ - /go;                   # Convert and separate dashes
-        s/,(?!\d)/ , /go;               # Shift commas off everything but numbers
+        s/,(?!\p{IsDigit})/ , /go;               # Shift commas off everything but numbers
         s/:$/ :/go;                     # Shift semicolons off
         s/(\.\.\.+)/ $1 /;              # Shift ellipses off 
         s/([\(\[\{\}\]\)])/ $1 /go;     # Shift off brackets
         s/([\!\?#\$%;~|])/ $1 /go;      # Shift off other ``standard'' punctuation
 
         # English-specific contractions
-        s/(?<=[a-zA-Z])'([dms])\b/ '$1/go;      # Separate off 'd 'm 's
+        s/(?<=\p{IsAlpha})'([dms])\b/ '$1/go;      # Separate off 'd 'm 's
         s/n't\b/ n't/go;                        # Separate off n't      
         s/'(ve|ll|re)\b/ '$1/go;                # Separate off 've, 'll, 're
         
@@ -548,19 +551,19 @@ sub _classify_unknown_word {
         } elsif( m/[\)\]\}]/o ){ # Right brackets
                 $word = "*RRB*";
         
-        } elsif ( m/-?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)/ ){ # Floating point number
+        } elsif ( m/-?(?:\p{IsDigit}+(?:\.\p{IsDigit}*)?|\.\p{IsDigit}+)/ ){ # Floating point number
                 $word = "*NUM*";
         
-        } elsif ( m/^[0-9]+[\d\/:-]+[0-9]/ ){ # Other number constructs
+        } elsif ( m/^\p{IsDigit}+[\p{IsDigit}\/:-]+\p{IsDigit}/ ){ # Other number constructs
                 $word = "*NUM*";
                 
-        } elsif ( m/^-?[0-9]+\w+$/o ){  # Ordinal number
+        } elsif ( m/^-?\p{IsDigit}+\p{IsWord}+$/o ){  # Ordinal number
                 $word = "*ORD*";
         
-        } elsif ( m/^[A-Z][A-Z\.-]*$/o ) { # Abbreviation (all caps)
+        } elsif ( m/^\p{IsUpper}[\p{IsUpper}\.-]*$/o ) { # Abbreviation (all caps)
                 $word = "-abr-";
         
-        } elsif ( m/\w-\w/o ){ # Hyphenated word
+        } elsif ( m/\p{IsWord}-\p{IsWord}/o ){ # Hyphenated word
                 my ( $h_suffix) = m/-([^-]+)$/;
                 
                 if ( $h_suffix and defined ${ $_LEXICON{$h_suffix}{'jj'} } ){
@@ -676,7 +679,7 @@ sub get_proper_nouns {
                 # is there a corresponding acronym in this hash?
                 if ( scalar @words > 2 ){
                         # Make a (naive) acronym out of this name
-                        my $acronym = join '', map{ /^(\w)\w*$/ } @words;
+                        my $acronym = join '', map{ /^(\p{IsWord})\p{IsWord}*$/ } @words;
                         if ( defined $nnp{$acronym} ){
                                 # If that acronym has been seen, 
                                 # remove it and add the values to
@@ -916,12 +919,20 @@ __END__
 
 =head1 AUTHORS
 
-    Maciej Ceglowski <developer@ceglowski.com>
     Aaron Coburn <acoburn@middlebury.edu>
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of version 2 of the GNU General Public License as
-published by the Free Software Foundation.
+=head1 CONTRIBUTORS
+
+    Maciej Ceglowski <developer@ceglowski.com>
+    Eric Nichols, Nara Institute of Science and Technology
+
+
+=head1 COPYRIGHT AND LICENSE
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of version 2 of the GNU General Public License as
+    published by the Free Software Foundation.
+
 
 
 =cut

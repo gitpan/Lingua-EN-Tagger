@@ -20,7 +20,7 @@ $p = new Lingua::EN::Tagger;
                 "Spring Clearance at J.C. Penny",
                 "Prof. Paul Nelson",
                 "Apr. 12, 1953",
-                "On Dsc. 24, 1994",
+                "On Dec. 24, 1994",
                 "The mtn. road"
         );
 
