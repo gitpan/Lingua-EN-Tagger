@@ -2,4 +2,12 @@ Makefile.PL
 MANIFEST
 README
 Tagger.pm
-test.pl
+t/clean.t
+t/load.t
+t/nouns.t
+t/parser.t
+t/relax.t
+t/weighted.t
+Tagger/tags.yml
+Tagger/unknown.yml
+Tagger/words.yml
