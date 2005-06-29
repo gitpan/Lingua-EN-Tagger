@@ -20,7 +20,7 @@ ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
 # Start by creating the parser object
 ######################################
 
-ok( $parser = Lingua::EN::Tagger->new(), 'creating parser object' );
+ok( $parser = Lingua::EN::Tagger->new( stem => 1), 'creating parser object' );
 
 
 

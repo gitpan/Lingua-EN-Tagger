@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use warnings;
 use strict;
@@ -117,16 +117,16 @@ values):
 
 Tag to assign to unknown words
 
-=item stem => 1
+=item stem => 0
 
 Stem single words using Lingua::Stem::EN
 
-=item weight_noun_phrases => 1
+=item weight_noun_phrases => 0
 
 When returning occurrence counts for a noun phrase, multiply the value 
 by the number of words in the NP.   
 
-=item longest_noun_phrase => 50
+=item longest_noun_phrase => 5
 
 Will ignore noun phrases longer than this threshold. This affects
 only the get_words() and get_nouns() methods.
@@ -145,9 +145,10 @@ uncommon words, particularly words used polysemously
 sub new {
         my ( $class, %params ) = @_;
         my $self = {    unknown_word_tag => '', 
-                        stem => 1,
-                        weight_noun_phrases => 1,
-                        longest_noun_phrase => 50,
+                        stem => 0,
+                        weight_noun_phrases => 0,
+                        longest_noun_phrase => 5,
+                        lc => 1,
                         tag_lex => 'tags.yml',
                         word_lex => 'words.yml',
                         unknown_lex => 'unknown.yml',
@@ -264,6 +265,39 @@ sub get_readable {
 
 
 
+######################################################################
+
+=item get_sentences TEXT
+
+Returns an anonymous array of sentences (without POS tags) from a text. 
+
+=cut            
+
+######################################################################
+sub get_sentences {
+		my ( $self, $text ) = @_;
+		
+		return unless $self->_valid_text( $text );
+        my $tagged = $self->add_tags( $text );
+        my @sentences;
+        {
+            local $self->{'lc'};
+            $self->{'lc'} = 0;
+		    @sentences = map { $self->_strip_tags( $_ ) } 
+						 split /<\/pp>/, $tagged;
+        }
+        
+		foreach ( @sentences ){
+			s/ ('s?) /$1 /g;
+			s/ (\P{IsWord}+) /$1 /g;
+			s/ (`+) / $1/g;
+			s/ (\P{IsWord}+)$/$1/;
+			s/^(`+) /$1/;
+		}
+		return \@sentences;
+}
+
+
 ###########################################
 # _valid_text TEXT
 # 
@@ -289,6 +323,15 @@ sub _valid_text {
 }               
 
 
+sub lower_case {
+	my ( $self, $lc ) = @_;
+	if( $lc ){
+		$self->{'lc'} = 1;
+	} else {
+		$self->{'lc'} = 0;
+	}
+}
+
 #####################################################################
 # _strip_tags TEXT
 #
@@ -302,7 +345,11 @@ sub _strip_tags {
         $text =~ s/\s+/ /gs;
         $text =~ s/^\s*//;
         $text =~ s/\s*$//;
-        return lc($text);
+        if( $self->{'lc'} ){
+	        return lc( $text );
+	    } else {
+	    	return $text;
+	    }
 }
                 
                 
@@ -384,7 +431,7 @@ sub _split_sentences {
         }
 
         # If the final word ends in a period...
-        if( $words[$#words] =~ /^(.*\p{IsWord})\.$/ ){                  
+        if( defined $words[$#words] and $words[$#words] =~ /^(.*\p{IsWord})\.$/ ){                  
                 $words[$#words] = $1;                           
                 push @words, '.';
         }
@@ -417,7 +464,7 @@ sub _split_punct {
         s/"(?=.*\p{IsWord})/ `` /og;            # Convert left quotes to `` 
         s/(?<![\p{IsWord}\s'])'(?=.*\p{IsWord})/ ` /go; # Convert left quotes to ` 
         s/"/ '' /og;                    # Convert (remaining) quotes to ''
-        s/(?<=\p{IsWord})'(?!')(?=\W|$)/ ' /go; # Separate right single quotes
+        s/(?<=\p{IsWord})'(?!')(?=\P{IsWord}|$)/ ' /go; # Separate right single quotes
 
         # Handle all other punctuation
         s/--+/ - /go;                   # Convert and separate dashes
@@ -669,7 +716,7 @@ sub get_proper_nouns {
         foreach my $n ( @trimmed ) {
                 
                 next unless length($n) < 100; # sanity check on word length
-                $nnp{$n}++ unless $n =~ /^\s*$/;
+                $nnp{ $n }++ unless $n =~ /^\s*$/;
         }
 
 
@@ -722,7 +769,7 @@ sub get_nouns {
                 
                 $n = $self->stem( $n );
                 next unless length($n) < 100; # sanity check on word length
-                $return{$n}++ unless $n =~ /^\s*$/;
+                $return{ $n }++ unless $n =~ /^\s*$/;
         
         }
         
@@ -823,7 +870,7 @@ sub get_noun_phrases {
                 $k = $self->stem( $k ) unless $word_count > 1; # stem single words
                 my $multiplier = 1;
                 $multiplier = $word_count if $self->{'weight_noun_phrases'};
-                $return{$k} += ( $multiplier * $v );
+                $return{ $k } += ( $multiplier * $v );
         }
         
         return %return;

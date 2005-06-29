@@ -12,12 +12,12 @@ if( install() ){
 WriteMakefile(
     'NAME'              => 'Lingua::EN::Tagger',
     'VERSION_FROM'      => 'Tagger.pm', # finds $VERSION
-    'PREREQ_PM'         => { 'Lingua::Stem::En' => '0.50', 
-                                'HTML::Parser' => '2.28',
+    'PREREQ_PM'         => { 'Lingua::Stem' => '0.81', 
+                                'HTML::Parser' => '3.45',
                                 'Memoize' => '1.01',
-                                'Memoize::ExpireLRU' => '0.01',
+                                'Memoize::ExpireLRU' => '0.55',
                                 'File::Spec' => '0.84',
-                                'Storable' => '2.08'
+                                'Storable' => '2.10'
                         }, # e.g., Module::Name => 1.1
     'AUTHOR' => 'Maciej Ceglowski and Aaron Coburn <maciej@ceglowski.com>, <acoburn@middlebury.edu>',
   

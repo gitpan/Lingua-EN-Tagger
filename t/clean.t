@@ -4,7 +4,7 @@
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Lingua::EN::Tagger;
 
 ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
@@ -20,7 +20,7 @@ ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
 # Start by creating the parser object
 ######################################
 
-ok( $parser = Lingua::EN::Tagger->new(), 'creating parser object' );
+ok( $parser = Lingua::EN::Tagger->new( stem => 1), 'creating parser object' );
 
 
 ########################################
@@ -36,7 +36,8 @@ like( join( " ", $parser->_split_punct( "'that's'" ) ), qr/` that 's '/, 'punctu
 like( join( " ", $parser->_split_punct( '"we\'ve"' ) ), qr/`` we 've ''/, 'punctuation 7' ); 
 like( join( " ", $parser->_split_punct( '"o\'er"' ) ), qr/`` o'er ''/, 'punctuation 8' ); 
 like( join( " ", $parser->_split_punct( 'naïve' )), qr/naïve/, 'punctuation 9' );
-like( join( " ", $parser->_clean_text( 'We, naïve souls, drank tea in a café.' ) ), qr/We , naïve souls , drank tea in a café ./, 'punctuation 10' );
+like( join( " ", $parser->_split_punct( "China's" ) ), qr/China 's/, 'punctuation 10' );
+like( join( " ", $parser->_clean_text( 'We, naïve souls, drank tea in a café.' ) ), qr/We , naïve souls , drank tea in a café ./, 'punctuation 11' );
 # Make sure that it doesn't die when parsing a non-text sample
 ok( $parser->add_tags( "#!/usr/bin/perl -w\nuse strict;\nmy \$var = 'hello world';
 print \$var | 'no value'; "), "non-text sample");

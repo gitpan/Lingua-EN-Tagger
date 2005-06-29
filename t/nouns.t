@@ -20,7 +20,7 @@ ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
 # Start by creating the parser object
 # (without the stemmer)
 ######################################
-ok( $parser = Lingua::EN::Tagger->new( stem => 0, weight_noun_phrases => 0 ), 'creating parser object' );
+ok( $parser = Lingua::EN::Tagger->new( stem => 0, weight_noun_phrases => 0, longest_noun_phrase => 15 ), 'creating parser object' );
 $tagged = $parser->add_tags( penn() );
 
 ok( %words = $parser->get_words( penn() ), 'get_words() method' );

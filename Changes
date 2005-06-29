@@ -1,5 +1,9 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.13            Aaron Coburn            6/29/05
+
+        Added 'get_sentences' method
+
 0.12            Aaron Coburn            3/39/05
 
         Fixed a bug introduced in the parsing of utf8 text

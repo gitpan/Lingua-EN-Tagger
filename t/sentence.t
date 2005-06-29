@@ -4,7 +4,7 @@
 #########################
 
 # change 'tests => 1' to 'tests => last_test_to_print';
-use Test::More tests => 7;
+use Test::More tests => 10;
 use Lingua::EN::Tagger;
 
 ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
@@ -30,6 +30,16 @@ foreach( @phrases ){
         is( $s, $_, "sentence ender $i");
         $i++;
 }
+
+
+$text = "A line of Chinese-made cars began rolling onto a ship here Friday, bound for Europe. The cars, made at a gleaming new Honda factory on the outskirts of this sprawling city near Hong Kong, signal the latest move by China to follow Japan and South Korea in building itself into a global competitor in one of the cornerstones of the industrial economy. China's debut as an auto exporter, small as it may be for now, foretells a broader challenge to a half-century of American economic and political ascendance. The nation's manufacturing companies are building wealth at a remarkable rate, using some of that money to buy assets abroad. And China has been scouring the world to acquire energy resources, with the bid to buy an American oil company only the latest overture.";
+
+ok( $sentences = $p->get_sentences( $text ) );
+is( scalar @$sentences, 5 );
+my $reunited = join( ' ', @$sentences );
+is( $reunited, $text );
+
+
 
 sub prepare {
         
