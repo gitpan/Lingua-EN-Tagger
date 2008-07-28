@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use warnings;
 use strict;
@@ -969,7 +969,7 @@ __END__
 
 =head1 AUTHORS
 
-    Aaron Coburn <acoburn@middlebury.edu>
+    Aaron Coburn <aaron@coburncuadrado.com>
 
 =head1 CONTRIBUTORS
 
@@ -980,7 +980,7 @@ __END__
 =head1 COPYRIGHT AND LICENSE
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of version 2 of the GNU General Public License as
+    it under the terms of version 3 of the GNU General Public License as
     published by the Free Software Foundation.
 
 

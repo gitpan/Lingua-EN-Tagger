@@ -19,7 +19,7 @@ WriteMakefile(
                                 'File::Spec' => '0.84',
                                 'Storable' => '2.10'
                         }, # e.g., Module::Name => 1.1
-    'AUTHOR' => 'Maciej Ceglowski and Aaron Coburn <maciej@ceglowski.com>, <acoburn@middlebury.edu>',
+    'AUTHOR' => 'Maciej Ceglowski and Aaron Coburn <maciej@ceglowski.com>, <aaron@coburncuadrado.com>',
   
 );
 

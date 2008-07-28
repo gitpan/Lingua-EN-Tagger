@@ -1,5 +1,8 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.14			Aaron Coburn			7/28/08
+		Upgraded license to GPL 3
+
 0.13            Aaron Coburn            6/29/05
 
         Added 'get_sentences' method
