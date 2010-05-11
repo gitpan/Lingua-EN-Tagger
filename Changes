@@ -1,5 +1,8 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.16            Aaron Coburn            5/11/10
+        Fixed POD errors
+
 0.14			Aaron Coburn			7/28/08
 		Upgraded license to GPL 3
 

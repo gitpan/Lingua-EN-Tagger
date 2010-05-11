@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use warnings;
 use strict;
@@ -176,9 +176,11 @@ sub new {
 
 ######################################################################
 
+=back
+
 =head1 METHODS
          
- 
+=over 
 
 =item add_tags TEXT
  
@@ -967,6 +969,8 @@ sub _load_words {
 
 __END__
 
+=back
+
 =head1 AUTHORS
 
     Aaron Coburn <aaron@coburncuadrado.com>
@@ -979,10 +983,10 @@ __END__
 
 =head1 COPYRIGHT AND LICENSE
 
+    Copyright 2003-2010 Aaron Coburn <aaron@coburncuadrado.com>
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of version 3 of the GNU General Public License as
     published by the Free Software Foundation.
-
-
 
 =cut
