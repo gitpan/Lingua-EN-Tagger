@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Lingua-EN-Tagger
-version:            0.16
+version:            0.17
 abstract:           ~
 author:
     - Maciej Ceglowski and Aaron Coburn <maciej@ceglowski.com>, <aaron@coburncuadrado.com>

@@ -1,5 +1,11 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.17            Aaron Coburn            5/10/12
+        Added better error handling for loading
+        YAML files. Fixed error in get_sentences
+        routine related to (, [ and { characters
+        being fused to the preceding word.
+
 0.16            Aaron Coburn            5/11/10
         Fixed POD errors
 

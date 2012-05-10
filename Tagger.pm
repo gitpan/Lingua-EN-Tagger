@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 use warnings;
 use strict;
@@ -291,10 +291,12 @@ sub get_sentences {
         
 		foreach ( @sentences ){
 			s/ ('s?) /$1 /g;
+            s/ ([\(\[\{]) / $1/g;
 			s/ (\P{IsWord}+) /$1 /g;
 			s/ (`+) / $1/g;
 			s/ (\P{IsWord}+)$/$1/;
 			s/^(`+) /$1/;
+            s/^([\(\[\{]) /$1/g;
 		}
 		return \@sentences;
 }
@@ -917,7 +919,7 @@ sub _load_tags {
         my ( $self, $lexicon ) = @_;
 
         my $path = File::Spec->catfile( $lexpath, $lexicon );
-        my $fh = new FileHandle $path or die $!;
+        my $fh = new FileHandle $path or die "Could not open $path: $!";
         while( <$fh> ){
                 next unless my ( $key, $data ) = m/^"?([^{"]+)"?: { (.*) }/;
                 my %tags = split /[:,]\s+/, $data;
@@ -946,7 +948,7 @@ sub _load_words {
         my ( $self, $lexicon ) = @_;
         my $path = File::Spec->catfile( $lexpath, $lexicon );
         
-        my $fh = new FileHandle $path or die $!;
+        my $fh = new FileHandle $path or die "Could not open $path: $!";
         while( <$fh> ){
                 next unless my ( $key, $data ) = m/^"?([^{"]+)"?: { (.*) }/;
                 my %tags = split /[:,]\s+/, $data;
