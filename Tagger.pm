@@ -1,9 +1,11 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 use warnings;
 use strict;
+
+use 5.008000;
 
 use Carp;
 use File::Spec;
@@ -291,12 +293,12 @@ sub get_sentences {
         
 		foreach ( @sentences ){
 			s/ ('s?) /$1 /g;
-            s/ ([\(\[\{]) / $1/g;
+            s/ ([\$\(\[\{]) / $1/g;
 			s/ (\P{IsWord}+) /$1 /g;
 			s/ (`+) / $1/g;
 			s/ (\P{IsWord}+)$/$1/;
 			s/^(`+) /$1/;
-            s/^([\(\[\{]) /$1/g;
+            s/^([\$\(\[\{]) /$1/g;
 		}
 		return \@sentences;
 }

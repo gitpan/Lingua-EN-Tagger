@@ -12,8 +12,10 @@ if( install() ){
 WriteMakefile(
     'NAME'              => 'Lingua::EN::Tagger',
     'VERSION_FROM'      => 'Tagger.pm', # finds $VERSION
+    'MIN_PERL_VERSION'  => '5.008001',
     'PREREQ_PM'         => { 'Lingua::Stem' => '0.81', 
                                 'HTML::Parser' => '3.45',
+                                'HTML::Tagset' => '3.20',
                                 'Memoize' => '1.01',
                                 'Memoize::ExpireLRU' => '0.55',
                                 'File::Spec' => '0.84',

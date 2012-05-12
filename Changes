@@ -1,5 +1,11 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.18            Aaron Coburn            5/11/12
+        Added requirement for 5.8 for proper
+        unicode support. Modified get_sentences
+        routine for $ chars as with preceeding 
+        issue.
+        
 0.17            Aaron Coburn            5/10/12
         Added better error handling for loading
         YAML files. Fixed error in get_sentences
