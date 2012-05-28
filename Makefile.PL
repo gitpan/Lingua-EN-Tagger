@@ -13,6 +13,8 @@ WriteMakefile(
     'NAME'              => 'Lingua::EN::Tagger',
     'VERSION_FROM'      => 'Tagger.pm', # finds $VERSION
     'MIN_PERL_VERSION'  => '5.008001',
+    'ABSTRACT_FROM'     => 'Tagger.pm',
+    'LICENSE'           => 'gpl_3',
     'PREREQ_PM'         => { 'Lingua::Stem' => '0.81', 
                                 'HTML::Parser' => '3.45',
                                 'HTML::Tagset' => '3.20',

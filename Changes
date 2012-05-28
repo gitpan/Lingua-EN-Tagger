@@ -1,5 +1,9 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.19            Aaron Coburn            5/28/12
+        Added missing metadata fields to
+        Makefile.PL
+
 0.18            Aaron Coburn            5/11/12
         Added requirement for 5.8 for proper
         unicode support. Modified get_sentences

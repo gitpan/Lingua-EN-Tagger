@@ -1,10 +1,10 @@
 --- #YAML:1.0
 name:               Lingua-EN-Tagger
-version:            0.18
-abstract:           ~
+version:            0.19
+abstract:           Part-of-speech tagger for English natural language processing.
 author:
     - Maciej Ceglowski and Aaron Coburn <maciej@ceglowski.com>, <aaron@coburncuadrado.com>
-license:            unknown
+license:            gpl_3
 distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
