@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 use warnings;
 use strict;
@@ -923,7 +923,7 @@ sub _load_tags {
         my $path = File::Spec->catfile( $lexpath, $lexicon );
         my $fh = new FileHandle $path or die "Could not open $path: $!";
         while( <$fh> ){
-                next unless my ( $key, $data ) = m/^"?([^{"]+)"?: { (.*) }/;
+                next unless my ( $key, $data ) = m/^"?([^\{"]+)"?: { (.*) }/;
                 my %tags = split /[:,]\s+/, $data;
                 foreach( keys %tags ){
                         $_HMM{$key}{$_} = $tags{$_};
@@ -952,7 +952,7 @@ sub _load_words {
         
         my $fh = new FileHandle $path or die "Could not open $path: $!";
         while( <$fh> ){
-                next unless my ( $key, $data ) = m/^"?([^{"]+)"?: { (.*) }/;
+                next unless my ( $key, $data ) = m/^"?([^\{"]+)"?: { (.*) }/;
                 my %tags = split /[:,]\s+/, $data;
                 foreach( keys %tags ){
                         $_LEXICON{$key}{$_} = \$tags{$_};
