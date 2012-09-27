@@ -1,5 +1,10 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.21            Aaron Coburn            9/27/12
+        Escaped some more curly braces in regex
+        patterns (see below). Made memoize module
+        support threads.
+
 0.20            Aaron Coburn            7/6/12
         Escaped curly braces in regex patterns.
         In perl 5.17 this becomes necessary.

@@ -11,6 +11,7 @@ t/parser_latin1.t
 t/parser_utf8.t
 t/relax.t
 t/sentence.t
+t/threads.t
 t/weighted.t
 Tagger/tags.yml
 Tagger/unknown.yml
