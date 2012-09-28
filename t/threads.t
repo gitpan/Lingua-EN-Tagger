@@ -6,42 +6,44 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 use Test::More tests => 12;
 use Lingua::EN::Tagger;
-use threads;
-use threads::shared;
 
 ok('Lingua::EN::Tagger', 'module compiled'); # If we made it this far, we're ok.
-
-#########################
-
-# Insert your test code below, the Test module is use()ed here so read
-# its man page ( perldoc Test ) for help writing this test script.
-
-
 
 ######################################
 # Start by creating the parser object
 # (without the stemmer)
 ######################################
 ok($tagger = Lingua::EN::Tagger->new( stem => 0, weight_noun_phrases => 0, longest_noun_phrase => 15 ), 'creating parser object' );
-ok($shared = shared_clone($tagger), 'creating shared object');
 
-sub tag {
-    my $text = shift;
-    return $shared->get_readable($text);
+SKIP: {
+    eval { 
+        require threads;
+        require threads::shared;
+    };
+
+    skip "threading support not available, skip threading tests", 10 if $@;
+
+    ok($shared = threads::shared::shared_clone($tagger), 'creating shared object');
+
+    sub tag {
+        my $text = shift;
+        return $shared->get_readable($text);
+    }
+
+    ok($penn = threads->new(\&tag, penn()), 'started thread with text');
+    ok($hyphen = threads->new(\&tag, hyphen()), 'started thread with hyphens');
+    ok($jibberish = threads->new(\&tag, jibberish()), 'started thread with unknown words');
+
+    ok($accuracy = compute_accuracy($penn->join, penn_benchmark()), 'computing accuracy');
+    cmp_ok($accuracy, '>=', 95, "overall accuracy ($accuracy%)");
+
+    ok($accuracy = compute_accuracy($hyphen->join, hyphen_benchmark()), 'computing accuracy');
+    cmp_ok($accuracy, '>=', 100, "overall accuracy ($accuracy%)");
+
+    ok($accuracy = compute_accuracy($jibberish->join, jibberish_benchmark()), 'computing accuracy');
+    cmp_ok($accuracy, '>=', 80, "overall accuracy ($accuracy%)");
 }
 
-ok($penn = threads->new(\&tag, penn()), 'started thread with text');
-ok($hyphen = threads->new(\&tag, hyphen()), 'started thread with hyphens');
-ok($jibberish = threads->new(\&tag, jibberish()), 'started thread with unknown words');
-
-ok($accuracy = compute_accuracy($penn->join, penn_benchmark()), 'computing accuracy');
-cmp_ok($accuracy, '>=', 95, "overall accuracy ($accuracy%)");
-
-ok($accuracy = compute_accuracy($hyphen->join, hyphen_benchmark()), 'computing accuracy');
-cmp_ok($accuracy, '>=', 100, "overall accuracy ($accuracy%)");
-
-ok($accuracy = compute_accuracy($jibberish->join, jibberish_benchmark()), 'computing accuracy');
-cmp_ok($accuracy, '>=', 80, "overall accuracy ($accuracy%)");
 
 
 
