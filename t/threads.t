@@ -23,10 +23,13 @@ SKIP: {
 
     skip "threading support not available, skip threading tests", 10 if $@;
 
-    ok($shared = threads::shared::shared_clone($tagger), 'creating shared object');
+    eval {
+        ok($shared = threads::shared::shared_clone($tagger), 'creating shared object');
+    };
+    skip "threading support not available, skip threading tests", 10 if $@;
 
     sub tag {
-        my $text = shift;
+        $text = shift;
         return $shared->get_readable($text);
     }
 

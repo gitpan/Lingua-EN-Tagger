@@ -1,5 +1,8 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.23            Aaron Coburn            10/1/12
+        Fixed errors in threads tests
+        
 0.21            Aaron Coburn            9/27/12
         Escaped some more curly braces in regex
         patterns (see below). Made memoize module
