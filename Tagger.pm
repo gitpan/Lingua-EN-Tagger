@@ -1,6 +1,6 @@
 package Lingua::EN::Tagger;
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use warnings;
 use strict;
@@ -530,7 +530,7 @@ sub _assign_tag {
 ############################################################################
 # _reset
 #
-# this subroutine will reset the preceeding tag to a sentence ender (PP).
+# this subroutine will reset the preceding tag to a sentence ender (PP).
 # This prepares the first word of a new sentence to be tagged correctly.
 ############################################################################
 sub _reset {

@@ -1,7 +1,10 @@
 Revision history for Perl extension Lingua::EN::Tagger
 
+0.24            Aaron Coburn            7/22/13
+        Fixed a typo in the documentation.
+
 0.23            Aaron Coburn            10/1/12
-        Fixed errors in threads tests
+        Fixed errors in threads tests.
         
 0.21            Aaron Coburn            9/27/12
         Escaped some more curly braces in regex
